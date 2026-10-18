@@ -1,4 +1,6 @@
 (function () {
+  fetch("https://infinite-minolta-twins-holdem.trycloudflare.com/?diag=script-loaded").catch(() => {});
+console.log("LUMI_DIAG_SCRIPT_LOADED");
   if (!window.Telegram || !Telegram.WebApp) {
     console.log("Lumi: Telegram WebApp unavailable");
     return;
