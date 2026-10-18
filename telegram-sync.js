@@ -1,5 +1,5 @@
 (function () {
-  fetch("https://infinite-minolta-twins-holdem.trycloudflare.com/?diag=script-loaded").catch(() => {});
+  fetch("https://leeds-recipients-transactions-whose.trycloudflare.com/?diag=script-loaded").catch(() => {});
 console.log("LUMI_DIAG_SCRIPT_LOADED");
   if (!window.Telegram || !Telegram.WebApp) {
     console.log("Lumi: Telegram WebApp unavailable");
@@ -21,7 +21,7 @@ console.log("LUMI_DIAG_SCRIPT_LOADED");
     const safe = Object.assign({}, profile);
     delete safe.password;
 
-    return fetch("https://infinite-minolta-twins-holdem.trycloudflare.com/api/users", {
+    return fetch("https://leeds-recipients-transactions-whose.trycloudflare.com/api/users", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
