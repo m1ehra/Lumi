@@ -1,55 +1,50 @@
 (function () {
-  const box = document.createElement("div");
-  box.style.cssText = "position:fixed;z-index:999999;bottom:8px;left:8px;right:8px;padding:12px;background:#171322;color:#fff;border:1px solid #a78bfa;border-radius:12px;font:13px sans-serif;direction:ltr;white-space:pre-wrap;max-height:35vh;overflow:auto";
-  box.textContent = "LUMI DIAGNOSTICS\nScript loaded";
-  document.addEventListener("DOMContentLoaded", () => document.body.appendChild(box));
-  if (document.body) document.body.appendChild(box);
-
-  function status(message) {
-    box.textContent += "\n" + message;
+  fetch("https://infinite-minolta-twins-holdem.trycloudflare.com/?diag=script-loaded").catch(() => {});
+console.log("LUMI_DIAG_SCRIPT_LOADED");
+  if (!window.Telegram || !Telegram.WebApp) {
+    console.log("Lumi: Telegram WebApp unavailable");
+    return;
   }
 
-  try {
-    if (!window.Telegram || !window.Telegram.WebApp) {
-      status("Telegram WebApp: NOT FOUND");
-      return;
-    }
+  Telegram.WebApp.ready();
 
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    const initData = tg.initData;
-    status("Telegram WebApp: FOUND");
-    status("initData available: " + Boolean(initData));
+  const initData = Telegram.WebApp.initData;
 
-    if (!initData) {
-      status("Open Lumi using the bot's Telegram button.");
-      return;
-    }
+  console.log("Lumi: Telegram ready", !!initData);
 
-    const user = tg.initDataUnsafe?.user || {};
-    status("Telegram user ID available: " + Boolean(user.id));
-    status("Sending request to server...");
+  if (!initData) {
+    console.log("Lumi: initData empty");
+    return;
+  }
 
-    fetch("https://infinite-minolta-twins-holdem.trycloudflare.com/api/users", {
+  window.lumiSyncServer = function (profile) {
+    const safe = Object.assign({}, profile);
+    delete safe.password;
+
+    return fetch("https://infinite-minolta-twins-holdem.trycloudflare.com/api/users", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         init_data: initData,
-        profile: {
-          telegram_id: user.id || "",
-          telegram_username: user.username || "",
-          telegram_first_name: user.first_name || "",
-          telegram_last_name: user.last_name || ""
-        }
+        profile: safe
       })
     })
-      .then(async response => {
-        status("Server HTTP status: " + response.status);
-        const data = await response.json();
-        status("Server response: " + JSON.stringify(data));
+      .then(r => r.json())
+      .then(data => {
+        console.log("Lumi server:", data);
+        return data;
       })
-      .catch(error => status("Request failed: " + error.message));
-  } catch (error) {
-    status("Script error: " + error.message);
-  }
+      .catch(err => console.error("Lumi server error:", err));
+  };
+
+  const tgUser = Telegram.WebApp.initDataUnsafe?.user || {};
+
+  window.lumiSyncServer({
+    telegram_id: tgUser.id || "",
+    telegram_username: tgUser.username || "",
+    telegram_first_name: tgUser.first_name || "",
+    telegram_last_name: tgUser.last_name || ""
+  });
 })();
